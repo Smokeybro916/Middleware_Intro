@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 
+const AppError = require('./AppError');
+
 
 app.use(morgan('tiny'))
 
@@ -29,8 +31,9 @@ const verifyPassword = (req, res, next) => {
   if(password === 'chickennugget'){
     next();
   }
+  throw new AppError('password require', 401)
   //res.send("Password Needed")
-  throw new Error('Password required!')
+  //throw new AppError(401, 'Password required!')
 }
 
 app.get('/', (req, res) => {
@@ -56,10 +59,8 @@ app.use((req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  console.log("******")
-  console.log("***ERRRORRR**")
-  console.log("******")
-  next();
+  const {status = 500, message = 'Something went wrong'} = err;
+  res.status(status).send(message)
 })
 
 app.listen(3000, () => {
